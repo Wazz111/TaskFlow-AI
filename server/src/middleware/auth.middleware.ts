@@ -5,8 +5,6 @@ import morgan from "morgan";
 
 import authRoutes from "./routes/auth.routes";
 
-import { errorMiddleware } from "./middleware/error.middleware";
-
 const app = express();
 
 app.use(helmet());
@@ -30,7 +28,5 @@ app.get("/api/health", (_req, res) => {
 });
 
 app.use("/api/v1/auth", authRoutes);
-
-app.use(errorMiddleware);
 
 export default app;
