@@ -12,6 +12,18 @@ enum UserRole {
   ADMIN
 }
 
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  COMPLETED
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
 model User {
   id        String   @id @default(cuid())
   name      String
@@ -20,6 +32,25 @@ model User {
   avatar    String?
   role      UserRole @default(USER)
 
+  tasks     Task[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Task {
+  id          String       @id @default(cuid())
+  title       String
+  description String?
+
+  status      TaskStatus   @default(TODO)
+  priority    TaskPriority @default(MEDIUM)
+
+  dueDate     DateTime?
+
+  userId      String
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
 }
