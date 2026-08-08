@@ -1,32 +1,37 @@
-import express from "express";
-import cors from "cors";
-import helmet from "helmet";
-import morgan from "morgan";
+import { Request, Response, NextFunction } from "express";
+import { verifyToken, JwtPayload } from "../utils/jwt";
+import { ApiError } from "../utils/ApiError";
 
-import authRoutes from "./routes/auth.routes";
+declare global {
+  namespace Express {
+    interface Request {
+      user?: JwtPayload;
+    }
+  }
+}
 
-const app = express();
+export const authMiddleware = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const authHeader = req.headers.authorization;
 
-app.use(helmet());
-app.use(cors());
-app.use(express.json());
-app.use(morgan("dev"));
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return next(new ApiError(401, "Authentication token missing"));
+  }
 
-app.get("/api", (_req, res) => {
-  res.status(200).json({
-    success: true,
-    message: "🚀 TaskFlow AI Backend is running!",
-  });
-});
+  const token = authHeader.split(" ")[1];
 
-app.get("/api/health", (_req, res) => {
-  res.status(200).json({
-    status: "ok",
-    uptime: process.uptime(),
-    timestamp: new Date().toISOString(),
-  });
-});
+  if (!token) {
+    return next(new ApiError(401, "Authentication token missing"));
+  }
 
-app.use("/api/v1/auth", authRoutes);
-
-export default app;
+  try {
+    const decoded = verifyToken(token);
+    req.user = decoded;
+    next();
+  } catch (error) {
+    return next(new ApiError(401, "Invalid or expired token"));
+  }
+};
