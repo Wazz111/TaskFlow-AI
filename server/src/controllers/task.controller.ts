@@ -30,3 +30,21 @@ export const createTask = async (
     next(error);
   }
 };
+
+export const getMyTasks = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const tasks = await taskService.getMyTasks(req.user!.userId);
+
+    return res.status(200).json({
+      success: true,
+      count: tasks.length,
+      tasks,
+    });
+  } catch (error) {
+    next(error);
+  }
+};

@@ -15,3 +15,14 @@ export const createTask = async (
     },
   });
 };
+
+export const getMyTasks = async (userId: string) => {
+  return prisma.task.findMany({
+    where: {
+      userId,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+};
