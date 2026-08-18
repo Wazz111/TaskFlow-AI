@@ -48,3 +48,23 @@ export const getMyTasks = async (
     next(error);
   }
 };
+
+export const getTaskById = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const task = await taskService.getTaskById(
+      req.params.id,
+      req.user!.userId
+    );
+
+    return res.status(200).json({
+      success: true,
+      task,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
