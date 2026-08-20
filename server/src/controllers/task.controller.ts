@@ -1,5 +1,8 @@
 import { Request, Response, NextFunction } from "express";
-import { createTaskSchema } from "../validators/task.validator";
+import {
+   createTaskSchema,
+   updateTaskSchema,
+} from "../validators/task.validator";
 import * as taskService from "../services/task.service";
 
 export const createTask = async (
@@ -58,6 +61,36 @@ export const getTaskById = async (
     const task = await taskService.getTaskById(
       req.params.id,
       req.user!.userId
+    );
+
+    return res.status(200).json({
+      success: true,
+      task,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateTask = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const parsed = updateTaskSchema.safeParse(req.body);
+
+  if (!parsed.success) {
+    return res.status(400).json({
+      success: false,
+      errors: parsed.error.flatten().fieldErrors,
+    });
+  }
+
+  try {
+    const task = await taskService.updateTask(
+      req.params.id,
+      req.user!.userId,
+      parsed.data
     );
 
     return res.status(200).json({
