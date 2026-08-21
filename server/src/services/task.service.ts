@@ -82,3 +82,27 @@ export const updateTask = async (
     },
   });
 };
+
+export const deleteTask = async (
+  taskId: string,
+  userId: string
+) => {
+  const task = await prisma.task.findFirst({
+    where: {
+      id: taskId,
+      userId,
+    },
+  });
+
+  if (!task) {
+    throw new ApiError(404, "Task not found");
+  }
+
+  await prisma.task.delete({
+    where: {
+      id: taskId,
+    },
+  });
+
+  return task;
+};

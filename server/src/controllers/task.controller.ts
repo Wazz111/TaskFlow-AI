@@ -101,3 +101,24 @@ export const updateTask = async (
     next(error);
   }
 };
+
+export const deleteTask = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const task = await taskService.deleteTask(
+      req.params.id,
+      req.user!.userId
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Task deleted successfully",
+      task,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
