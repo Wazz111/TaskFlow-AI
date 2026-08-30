@@ -21,8 +21,10 @@ const sanitizeUser = (user: {
 };
 
 export const registerUser = async (data: RegisterInput) => {
+  const email = data.email.trim().toLowerCase();
+
   const existingUser = await prisma.user.findUnique({
-    where: { email: data.email },
+    where: { email },
   });
 
   if (existingUser) {
@@ -45,21 +47,29 @@ export const registerUser = async (data: RegisterInput) => {
 };
 
 export const loginUser = async (data: LoginInput) => {
+  const email = data.email.trim().toLowerCase();
+  
   const user = await prisma.user.findUnique({
-    where: { email: data.email },
+    where: { email },
   });
 
   if (!user) {
     throw new ApiError(401, 'Invalid email or password');
   }
 
-  const isPasswordValid = await bcrypt.compare(data.password, user.password);
+  const isPasswordValid = await bcrypt.compare(
+    data.password,
+    user.password,
+  );
 
   if (!isPasswordValid) {
     throw new ApiError(401, 'Invalid email or password');
   }
 
-  const token = signToken({ userId: user.id, email: user.email });
+  const token = signToken({ 
+    userId: user.id, 
+    email: user.email,
+  });
 
   return { user: sanitizeUser(user), token };
 };
