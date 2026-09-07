@@ -2,6 +2,7 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
+import Register from "./pages/Register";
 
 function App() {
   const token = localStorage.getItem("token");
@@ -17,6 +18,11 @@ function App() {
         <Route
           path="/dashboard"
           element={token ? <Dashboard /> : <Navigate to="/login" replace />}
+        />
+
+        <Route
+          path="/register"
+          element={token ? <Navigate to="/dashboard" replace /> : <Register />}
         />
 
         <Route

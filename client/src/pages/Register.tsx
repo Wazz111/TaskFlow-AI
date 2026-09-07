@@ -1,25 +1,36 @@
 import { FormEvent, useState } from "react";
-import { login } from "../services/auth.service";
+import { useNavigate } from "react-router-dom";
+import { register } from "../services/auth.service";
 import { Link } from "react-router-dom";
 
-function Login() {
+function Register() {
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
 
+  const navigate = useNavigate();
+
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
+    setMessage("");
 
     try {
-      await login({
-        email,
-        password,
-      });
-      
-      window.location.reload();
+      const data = await register({
+  name,
+  email,
+  password,
+});
+
+localStorage.setItem("token", data.token);
+
+window.location.href = "/dashboard";
+
     } catch (error) {
       setMessage(
-        error instanceof Error ? error.message : "Login failed"
+        error instanceof Error
+          ? error.message
+          : "Registration failed"
       );
     }
   };
@@ -27,9 +38,20 @@ function Login() {
   return (
     <div>
       <h1>TaskFlow-AI</h1>
-      <h2>Login</h2>
+      <h2>Create an Account</h2>
 
       <form onSubmit={handleSubmit}>
+        <div>
+          <label htmlFor="name">Name</label>
+          <input
+            id="name"
+            type="text"
+            value={name}
+            onChange={(event) => setName(event.target.value)}
+            required
+          />
+        </div>
+
         <div>
           <label htmlFor="email">Email</label>
           <input
@@ -52,17 +74,17 @@ function Login() {
           />
         </div>
 
-        <button type="submit">Login</button>
+        <button type="submit">Register</button>
       </form>
 
       {message && <p>{message}</p>}
 
       <p>
-        Don't have an account?{" "} 
-        <Link to="/register">Register</Link>
+        Already have an account?{" "}
+        <Link to="/login">Login</Link>
       </p>
     </div>
   );
 }
 
-export default Login;
+export default Register;
