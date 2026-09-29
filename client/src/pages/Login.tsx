@@ -1,6 +1,6 @@
 import { FormEvent, useState } from "react";
-import { login } from "../services/auth.service";
 import { Link } from "react-router-dom";
+import { login } from "../services/auth.service";
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -9,14 +9,15 @@ function Login() {
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
+    setMessage("");
 
     try {
       await login({
         email,
         password,
       });
-      
-      window.location.reload();
+
+      window.location.href = "/dashboard";
     } catch (error) {
       setMessage(
         error instanceof Error ? error.message : "Login failed"
@@ -25,42 +26,48 @@ function Login() {
   };
 
   return (
-    <div>
-      <h1>TaskFlow-AI</h1>
-      <h2>Login</h2>
+    <div className="auth-page">
+      <div className="auth-card">
+        <h1>TaskFlow-AI</h1>
+        <h2>Login</h2>
 
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor="email">Email</label>
-          <input
-            id="email"
-            type="email"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            required
-          />
-        </div>
+        <form className="auth-form" onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label htmlFor="email">Email</label>
 
-        <div>
-          <label htmlFor="password">Password</label>
-          <input
-            id="password"
-            type="password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            required
-          />
-        </div>
+            <input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              required
+            />
+          </div>
 
-        <button type="submit">Login</button>
-      </form>
+          <div className="form-group">
+            <label htmlFor="password">Password</label>
 
-      {message && <p>{message}</p>}
+            <input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              required
+            />
+          </div>
 
-      <p>
-        Don't have an account?{" "} 
-        <Link to="/register">Register</Link>
-      </p>
+          <button className="auth-button" type="submit">
+            Login
+          </button>
+        </form>
+
+        {message && <p className="auth-message">{message}</p>}
+
+        <p className="auth-switch">
+          Don't have an account?{" "}
+          <Link to="/register">Register</Link>
+        </p>
+      </div>
     </div>
   );
 }

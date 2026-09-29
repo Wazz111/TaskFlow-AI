@@ -1,7 +1,6 @@
 import { FormEvent, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { register } from "../services/auth.service";
 import { Link } from "react-router-dom";
+import { register } from "../services/auth.service";
 
 function Register() {
   const [name, setName] = useState("");
@@ -9,23 +8,35 @@ function Register() {
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
 
-  const navigate = useNavigate();
-
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
     setMessage("");
 
+    if (!name.trim()) {
+      setMessage("Name is required.");
+      return;
+    }
+
+    if (!email.trim()) {
+      setMessage("Email is required.");
+      return;
+    }
+
+    if (password.length < 8) {
+      setMessage("Password must be at least 8 characters long.");
+      return;
+    }
+
     try {
       const data = await register({
-  name,
-  email,
-  password,
-});
+        name,
+        email,
+        password,
+      });
 
-localStorage.setItem("token", data.token);
+      localStorage.setItem("token", data.token);
 
-window.location.href = "/dashboard";
-
+      window.location.href = "/dashboard";
     } catch (error) {
       setMessage(
         error instanceof Error
@@ -36,53 +47,66 @@ window.location.href = "/dashboard";
   };
 
   return (
-    <div>
-      <h1>TaskFlow-AI</h1>
-      <h2>Create an Account</h2>
+    <div className="auth-page">
+      <div className="auth-card">
+        <h1>TaskFlow-AI</h1>
+        <h2>Create an Account</h2>
 
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor="name">Name</label>
-          <input
-            id="name"
-            type="text"
-            value={name}
-            onChange={(event) => setName(event.target.value)}
-            required
-          />
-        </div>
+        <form className="auth-form" onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label htmlFor="name">Name</label>
 
-        <div>
-          <label htmlFor="email">Email</label>
-          <input
-            id="email"
-            type="email"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            required
-          />
-        </div>
+            <input
+              id="name"
+              type="text"
+              value={name}
+              onChange={(event) => setName(event.target.value)}
+              required
+            />
+          </div>
 
-        <div>
-          <label htmlFor="password">Password</label>
-          <input
-            id="password"
-            type="password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            required
-          />
-        </div>
+          <div className="form-group">
+            <label htmlFor="email">Email</label>
 
-        <button type="submit">Register</button>
-      </form>
+            <input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              required
+            />
+          </div>
 
-      {message && <p>{message}</p>}
+          <div className="form-group">
+            <label htmlFor="password">Password</label>
 
-      <p>
-        Already have an account?{" "}
-        <Link to="/login">Login</Link>
-      </p>
+            <div className="password-input-area">
+              <input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                required
+              />
+
+              <small>
+                Password must be at least 8 characters long.
+              </small>
+            </div>
+          </div>
+
+          <button className="auth-button" type="submit">
+            Register
+          </button>
+        </form>
+
+        {message && <p className="auth-message">{message}</p>}
+
+        <p className="auth-switch">
+          Already have an account?{" "}
+          <Link to="/login">Login</Link>
+        </p>
+      </div>
     </div>
   );
 }
