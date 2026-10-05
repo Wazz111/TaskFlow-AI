@@ -19,11 +19,25 @@ function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  // Create Task form state
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [priority, setPriority] =
     useState<TaskPriority>("MEDIUM");
   const [dueDate, setDueDate] = useState("");
+
+  // Edit Task form state
+  const [editingTaskId, setEditingTaskId] =
+    useState<string | null>(null);
+
+  const [editTitle, setEditTitle] = useState("");
+  const [editDescription, setEditDescription] =
+    useState("");
+
+  const [editPriority, setEditPriority] =
+    useState<TaskPriority>("MEDIUM");
+
+  const [editDueDate, setEditDueDate] = useState("");
 
   const loadTasks = async () => {
     try {
@@ -120,11 +134,97 @@ function Dashboard() {
           (task) => task.id !== taskId
         )
       );
+
+      if (editingTaskId === taskId) {
+        cancelEditing();
+      }
     } catch (error) {
       setError(
         error instanceof Error
           ? error.message
           : "Failed to delete task"
+      );
+    }
+  };
+
+  const formatDateForInput = (
+    dateString: string | null | undefined
+  ) => {
+    if (!dateString) {
+      return "";
+    }
+
+    const date = new Date(dateString);
+
+    const year = date.getFullYear();
+    const month = String(
+      date.getMonth() + 1
+    ).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(
+      date.getMinutes()
+    ).padStart(2, "0");
+
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  };
+
+  const startEditing = (task: Task) => {
+    setError("");
+
+    setEditingTaskId(task.id);
+    setEditTitle(task.title);
+    setEditDescription(task.description ?? "");
+    setEditPriority(task.priority);
+    setEditDueDate(
+      formatDateForInput(task.dueDate)
+    );
+  };
+
+  const cancelEditing = () => {
+    setEditingTaskId(null);
+    setEditTitle("");
+    setEditDescription("");
+    setEditPriority("MEDIUM");
+    setEditDueDate("");
+  };
+
+  const handleSaveEdit = async (
+    taskId: string
+  ) => {
+    setError("");
+
+    if (!editTitle.trim()) {
+      setError("Title is required.");
+      return;
+    }
+
+    try {
+      const data = await api(`/tasks/${taskId}`, {
+        method: "PUT",
+        body: JSON.stringify({
+          title: editTitle.trim(),
+          description:
+            editDescription.trim() || undefined,
+          priority: editPriority,
+          dueDate: editDueDate
+            ? new Date(editDueDate).toISOString()
+            : undefined,
+        }),
+      });
+
+      setTasks((currentTasks) =>
+        currentTasks.map((task) =>
+          task.id === taskId ? data.task : task
+        )
+      );
+
+      cancelEditing();
+    } catch (error) {
+      setError(
+        error instanceof Error
+          ? error.message
+          : "Failed to update task"
       );
     }
   };
@@ -147,12 +247,15 @@ function Dashboard() {
       <header className="dashboard-header">
         <div>
           <h1>TaskFlow-AI</h1>
-          <p>Manage your tasks and stay productive.</p>
+          <p>
+            Manage your tasks and stay productive.
+          </p>
         </div>
 
         <button
           className="logout-button"
           onClick={handleLogout}
+          type="button"
         >
           Logout
         </button>
@@ -162,7 +265,9 @@ function Dashboard() {
         <section className="dashboard-section">
           <div className="section-heading">
             <h2>Create Task</h2>
-            <p>Add something new to your workflow.</p>
+            <p>
+              Add something new to your workflow.
+            </p>
           </div>
 
           <form
@@ -170,7 +275,10 @@ function Dashboard() {
             onSubmit={handleCreateTask}
           >
             <div className="dashboard-field">
-              <label htmlFor="title">Title</label>
+              <label htmlFor="title">
+                Title
+              </label>
+
               <input
                 id="title"
                 type="text"
@@ -187,11 +295,14 @@ function Dashboard() {
               <label htmlFor="description">
                 Description
               </label>
+
               <textarea
                 id="description"
                 value={description}
                 onChange={(event) =>
-                  setDescription(event.target.value)
+                  setDescription(
+                    event.target.value
+                  )
                 }
                 maxLength={1000}
               />
@@ -213,11 +324,17 @@ function Dashboard() {
                     )
                   }
                 >
-                  <option value="LOW">Low</option>
+                  <option value="LOW">
+                    Low
+                  </option>
+
                   <option value="MEDIUM">
                     Medium
                   </option>
-                  <option value="HIGH">High</option>
+
+                  <option value="HIGH">
+                    High
+                  </option>
                 </select>
               </div>
 
@@ -231,7 +348,9 @@ function Dashboard() {
                   type="datetime-local"
                   value={dueDate}
                   onChange={(event) =>
-                    setDueDate(event.target.value)
+                    setDueDate(
+                      event.target.value
+                    )
                   }
                 />
               </div>
@@ -255,9 +374,12 @@ function Dashboard() {
         <section className="dashboard-section">
           <div className="section-heading">
             <h2>My Tasks</h2>
+
             <p>
               {tasks.length}{" "}
-              {tasks.length === 1 ? "task" : "tasks"}
+              {tasks.length === 1
+                ? "task"
+                : "tasks"}
             </p>
           </div>
 
@@ -275,91 +397,257 @@ function Dashboard() {
                   className="task-card"
                   key={task.id}
                 >
-                  <div className="task-card-header">
-                    <div>
-                      <h3>{task.title}</h3>
+                  {editingTaskId ===
+                  task.id ? (
+                    <div className="task-edit-form">
+                      <div className="dashboard-field">
+                        <label
+                          htmlFor={`edit-title-${task.id}`}
+                        >
+                          Title
+                        </label>
 
-                      {task.description && (
-                        <p>{task.description}</p>
-                      )}
+                        <input
+                          id={`edit-title-${task.id}`}
+                          type="text"
+                          value={editTitle}
+                          onChange={(event) =>
+                            setEditTitle(
+                              event.target
+                                .value
+                            )
+                          }
+                          required
+                          maxLength={100}
+                        />
+                      </div>
+
+                      <div className="dashboard-field">
+                        <label
+                          htmlFor={`edit-description-${task.id}`}
+                        >
+                          Description
+                        </label>
+
+                        <textarea
+                          id={`edit-description-${task.id}`}
+                          value={
+                            editDescription
+                          }
+                          onChange={(event) =>
+                            setEditDescription(
+                              event.target
+                                .value
+                            )
+                          }
+                          maxLength={1000}
+                        />
+                      </div>
+
+                      <div className="task-form-row">
+                        <div className="dashboard-field">
+                          <label
+                            htmlFor={`edit-priority-${task.id}`}
+                          >
+                            Priority
+                          </label>
+
+                          <select
+                            id={`edit-priority-${task.id}`}
+                            value={
+                              editPriority
+                            }
+                            onChange={(
+                              event
+                            ) =>
+                              setEditPriority(
+                                event.target
+                                  .value as TaskPriority
+                              )
+                            }
+                          >
+                            <option value="LOW">
+                              Low
+                            </option>
+
+                            <option value="MEDIUM">
+                              Medium
+                            </option>
+
+                            <option value="HIGH">
+                              High
+                            </option>
+                          </select>
+                        </div>
+
+                        <div className="dashboard-field">
+                          <label
+                            htmlFor={`edit-due-date-${task.id}`}
+                          >
+                            Due Date
+                          </label>
+
+                          <input
+                            id={`edit-due-date-${task.id}`}
+                            type="datetime-local"
+                            value={
+                              editDueDate
+                            }
+                            onChange={(
+                              event
+                            ) =>
+                              setEditDueDate(
+                                event.target
+                                  .value
+                              )
+                            }
+                          />
+                        </div>
+                      </div>
+
+                      <div className="task-actions">
+                        <button
+                          className="primary-button"
+                          type="button"
+                          onClick={() =>
+                            handleSaveEdit(
+                              task.id
+                            )
+                          }
+                        >
+                          Save Changes
+                        </button>
+
+                        <button
+                          className="secondary-button"
+                          type="button"
+                          onClick={
+                            cancelEditing
+                          }
+                        >
+                          Cancel
+                        </button>
+                      </div>
                     </div>
+                  ) : (
+                    <>
+                      <div className="task-card-header">
+                        <div>
+                          <h3>
+                            {task.title}
+                          </h3>
 
-                    <span
-                      className={`priority-badge priority-${task.priority.toLowerCase()}`}
-                    >
-                      {task.priority}
-                    </span>
-                  </div>
+                          {task.description && (
+                            <p>
+                              {
+                                task.description
+                              }
+                            </p>
+                          )}
+                        </div>
 
-                  <div className="task-meta">
-                    <span
-                      className={`status-badge status-${task.status.toLowerCase()}`}
-                    >
-                      {task.status.replace("_", " ")}
-                    </span>
+                        <span
+                          className={`priority-badge priority-${task.priority.toLowerCase()}`}
+                        >
+                          {task.priority}
+                        </span>
+                      </div>
 
-                    {task.dueDate && (
-                      <span>
-                        Due:{" "}
-                        {new Date(
-                          task.dueDate
-                        ).toLocaleString()}
-                      </span>
-                    )}
-                  </div>
+                      <div className="task-meta">
+                        <span
+                          className={`status-badge status-${task.status.toLowerCase()}`}
+                        >
+                          {task.status.replace(
+                            "_",
+                            " "
+                          )}
+                        </span>
 
-                  <div className="task-actions">
-                    {task.status === "TODO" && (
-                      <button
-                        className="secondary-button"
-                        onClick={() =>
-                          handleUpdateStatus(
-                            task.id,
-                            "IN_PROGRESS"
-                          )
-                        }
-                      >
-                        Start
-                      </button>
-                    )}
+                        {task.dueDate && (
+                          <span>
+                            Due:{" "}
+                            {new Date(
+                              task.dueDate
+                            ).toLocaleString()}
+                          </span>
+                        )}
+                      </div>
 
-                    {task.status !== "COMPLETED" && (
-                      <button
-                        className="primary-button"
-                        onClick={() =>
-                          handleUpdateStatus(
-                            task.id,
-                            "COMPLETED"
-                          )
-                        }
-                      >
-                        Complete
-                      </button>
-                    )}
+                      <div className="task-actions">
+                        {task.status ===
+                          "TODO" && (
+                          <button
+                            className="secondary-button"
+                            type="button"
+                            onClick={() =>
+                              handleUpdateStatus(
+                                task.id,
+                                "IN_PROGRESS"
+                              )
+                            }
+                          >
+                            Start
+                          </button>
+                        )}
 
-                    {task.status === "COMPLETED" && (
-                      <button
-                        className="secondary-button"
-                        onClick={() =>
-                          handleUpdateStatus(
-                            task.id,
-                            "TODO"
-                          )
-                        }
-                      >
-                        Reopen
-                      </button>
-                    )}
+                        {task.status !==
+                          "COMPLETED" && (
+                          <button
+                            className="primary-button"
+                            type="button"
+                            onClick={() =>
+                              handleUpdateStatus(
+                                task.id,
+                                "COMPLETED"
+                              )
+                            }
+                          >
+                            Complete
+                          </button>
+                        )}
 
-                    <button
-                      className="danger-button"
-                      onClick={() =>
-                        handleDeleteTask(task.id)
-                      }
-                    >
-                      Delete
-                    </button>
-                  </div>
+                        {task.status ===
+                          "COMPLETED" && (
+                          <button
+                            className="secondary-button"
+                            type="button"
+                            onClick={() =>
+                              handleUpdateStatus(
+                                task.id,
+                                "TODO"
+                              )
+                            }
+                          >
+                            Reopen
+                          </button>
+                        )}
+
+                        <button
+                          className="secondary-button"
+                          type="button"
+                          onClick={() =>
+                            startEditing(
+                              task
+                            )
+                          }
+                        >
+                          Edit
+                        </button>
+
+                        <button
+                          className="danger-button"
+                          type="button"
+                          onClick={() =>
+                            handleDeleteTask(
+                              task.id
+                            )
+                          }
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </>
+                  )}
                 </article>
               ))}
             </div>
