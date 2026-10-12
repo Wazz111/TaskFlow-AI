@@ -560,4 +560,78 @@
       flex-direction: column;
       gap: 10px;
     }
+
+    .task-toolbar {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 12px;
+      align-items: end;
+      margin-bottom: 24px;
+    }
+    
+    .task-toolbar .dashboard-field {
+      min-width: 0;
+    }
+    
+    .task-search input {
+      width: 100%;
+    }
+    
+    @media (max-width: 800px) {
+      .task-toolbar {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+    
+    @media (max-width: 520px) {
+      .task-toolbar {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    .task-search-wrapper {
+      position: relative;
+    }
+    
+    .search-suggestions {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      right: 0;
+      z-index: 10;
+    
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+    
+    .search-suggestion {
+      width: 100%;
+      display: block;
+      padding: 10px 12px;
+    
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid var(--border);
+    
+      color: var(--text-h);
+      text-align: left;
+      font: inherit;
+      cursor: pointer;
+    }
+    
+    .search-suggestion:last-child {
+      border-bottom: none;
+    }
+    
+    .search-suggestion:hover {
+      background: var(--accent-bg);
+    }
+    
+    .no-search-results {
+      padding: 10px 12px;
+      color: var(--text);
+    }
   }
