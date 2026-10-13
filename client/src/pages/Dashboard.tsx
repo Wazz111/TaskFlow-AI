@@ -6,7 +6,9 @@ import {
 } from "react";
 
 import { api } from "../services/api";
-import { logout } from "../services/auth.service";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+
 
 type TaskStatus =
   | "TODO"
@@ -43,6 +45,10 @@ interface Task {
 }
 
 function Dashboard() {
+
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -491,9 +497,7 @@ function Dashboard() {
 
   const handleLogout = () => {
     logout();
-
-    window.location.href =
-      "/login";
+    navigate("/login");
   };
 
   if (loading) {

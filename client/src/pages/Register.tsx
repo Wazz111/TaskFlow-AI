@@ -1,8 +1,11 @@
 import { FormEvent, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { register } from "../services/auth.service";
+import { useAuth } from "../context/AuthContext";
 
 function Register() {
+  const { setAuthToken } = useAuth();
+  const navigate = useNavigate();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -34,9 +37,9 @@ function Register() {
         password,
       });
 
-      localStorage.setItem("token", data.token);
+      setAuthToken(data.token);
 
-      window.location.href = "/dashboard";
+      navigate("/dashboard");
     } catch (error) {
       setMessage(
         error instanceof Error

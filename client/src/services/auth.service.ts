@@ -12,14 +12,10 @@ export interface RegisterData {
 }
 
 export const login = async (data: LoginData) => {
-  const response = await api("/auth/login", {
+  return api("/auth/login", {
     method: "POST",
     body: JSON.stringify(data),
   });
-
-  localStorage.setItem("token", response.token);
-
-  return response;
 };
 
 export const register = async (data: RegisterData) => {
@@ -27,8 +23,4 @@ export const register = async (data: RegisterData) => {
     method: "POST",
     body: JSON.stringify(data),
   });
-};
-
-export const logout = () => {
-  localStorage.removeItem("token");
 };
