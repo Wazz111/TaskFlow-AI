@@ -9,12 +9,18 @@ function Login() {
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
 
-  const { setAuthToken } = useAuth();
+  const {
+     setAuthToken, 
+     authMessage,
+     clearAuthMessage,
+  } = useAuth();
+
   const navigate = useNavigate();
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
     setMessage("");
+    clearAuthMessage();
 
     try {
       const data = await login({
@@ -86,6 +92,12 @@ function Login() {
         {message && (
           <p className="auth-message">
             {message}
+          </p>
+        )}
+
+        {authMessage && (
+          <p className="auth-message">
+            {authMessage}
           </p>
         )}
 

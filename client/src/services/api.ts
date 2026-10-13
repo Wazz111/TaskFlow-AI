@@ -19,8 +19,23 @@ export const api = async (
 
   const data = await response.json();
 
+  if (response.status === 401 && token) {
+    localStorage.removeItem("token");
+
+    window.dispatchEvent(
+      new CustomEvent("auth:unauthorized", {
+        detail: {
+          message:
+            "Your session has expired. Please log in again.",
+        },
+      })
+    );
+  }
+
   if (!response.ok) {
-    throw new Error(data.message || "Something went wrong");
+    throw new Error(
+      data.message || "Something went wrong"
+    );
   }
 
   return data;
