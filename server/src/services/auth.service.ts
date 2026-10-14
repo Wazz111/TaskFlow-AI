@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import prisma from "../config/database";
 import { signToken } from "../utils/jwt";
 import { ApiError } from "../utils/ApiError";
+import { sendWelcomeEmail } from "./email.service";
 
 import {
   RegisterInput,
@@ -67,15 +68,25 @@ export const registerUser = async (
       },
     });
 
-  const token = signToken({
-    userId: user.id,
-    email: user.email,
-  });
-
-  return {
-    user: sanitizeUser(user),
-    token,
-  };
+    const token = signToken({
+      userId: user.id,
+      email: user.email,
+    });
+    
+    void sendWelcomeEmail({
+      email: user.email,
+      name: user.name,
+    }).catch((error) => {
+      console.error(
+        "Failed to send welcome email:",
+        error
+      );
+    });
+    
+    return {
+      user: sanitizeUser(user),
+      token,
+    };
 };
 
 export const loginUser = async (
