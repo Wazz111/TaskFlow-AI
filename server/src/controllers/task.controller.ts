@@ -1,10 +1,14 @@
-import { Request, Response, NextFunction } from "express";
+
+import type { Request, Response, NextFunction } from "express";
+
 import {
-   createTaskSchema,
-   updateTaskSchema,
+  createTaskSchema,
+  updateTaskSchema,
 } from "../validators/task.validator";
+
 import * as taskService from "../services/task.service";
 
+// CREATE TASK
 export const createTask = async (
   req: Request,
   res: Response,
@@ -34,13 +38,16 @@ export const createTask = async (
   }
 };
 
+// GET ALL MY TASKS
 export const getMyTasks = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const tasks = await taskService.getMyTasks(req.user!.userId);
+    const tasks = await taskService.getMyTasks(
+      req.user!.userId
+    );
 
     return res.status(200).json({
       success: true,
@@ -52,14 +59,24 @@ export const getMyTasks = async (
   }
 };
 
+// GET TASK BY ID
 export const getTaskById = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
+    const taskId = req.params.id;
+
+    if (typeof taskId !== "string") {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid task ID",
+      });
+    }
+
     const task = await taskService.getTaskById(
-      req.params.id,
+      taskId,
       req.user!.userId
     );
 
@@ -72,6 +89,7 @@ export const getTaskById = async (
   }
 };
 
+// UPDATE TASK
 export const updateTask = async (
   req: Request,
   res: Response,
@@ -87,8 +105,17 @@ export const updateTask = async (
   }
 
   try {
+    const taskId = req.params.id;
+
+    if (typeof taskId !== "string") {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid task ID",
+      });
+    }
+
     const task = await taskService.updateTask(
-      req.params.id,
+      taskId,
       req.user!.userId,
       parsed.data
     );
@@ -102,14 +129,24 @@ export const updateTask = async (
   }
 };
 
+// DELETE TASK
 export const deleteTask = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
+    const taskId = req.params.id;
+
+    if (typeof taskId !== "string") {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid task ID",
+      });
+    }
+
     const task = await taskService.deleteTask(
-      req.params.id,
+      taskId,
       req.user!.userId
     );
 

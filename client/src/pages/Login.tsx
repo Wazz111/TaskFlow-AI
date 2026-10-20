@@ -1,4 +1,4 @@
-import { FormEvent, useState } from "react";
+import { type FormEvent, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 import { login } from "../services/auth.service";
@@ -10,7 +10,7 @@ function Login() {
   const [message, setMessage] = useState("");
 
   const {
-     setAuthToken, 
+     setAuthToken,
      authMessage,
      clearAuthMessage,
   } = useAuth();

@@ -32,6 +32,11 @@ model User {
   avatar    String?
   role      UserRole @default(USER)
 
+  emailVerified                Boolean   @default(false)
+  emailVerificationTokenHash   String?   @unique
+  emailVerificationExpiresAt   DateTime?
+  emailVerificationLastSentAt  DateTime?
+
   tasks     Task[]
 
   createdAt DateTime @default(now())

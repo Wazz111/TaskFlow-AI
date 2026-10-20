@@ -54,3 +54,41 @@ You can now create, organize, and manage your tasks.`,
 
   return data;
 };
+
+interface VerificationEmailOptions {
+    email: string;
+    name: string;
+    verificationUrl: string;
+  }
+
+  export const sendVerificationEmail = async ({
+    email,
+    name,
+    verificationUrl,
+  }: VerificationEmailOptions) => {
+    const resend = getEmailClient();
+
+    const { data, error } = await resend.emails.send({
+      from: getSender(),
+      to: email,
+      subject: "Verify your TaskFlow-AI email",
+      text: `Hi ${name},
+
+  Please verify your email address to finish setting up your TaskFlow-AI account.
+
+  Verify your email:
+  ${verificationUrl}
+
+  This link expires in 24 hours.
+
+  If you did not create this account, you can ignore this email.`,
+    });
+
+    if (error) {
+      throw new Error(
+        `Failed to send verification email: ${error.message}`
+      );
+    }
+
+    return data;
+  };

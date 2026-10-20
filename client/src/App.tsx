@@ -8,6 +8,8 @@ import {
 import Dashboard from "./pages/Dashboard";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import VerifyEmail from "./pages/VerifyEmail";
+import CheckEmail from "./pages/CheckEmail";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 import { useAuth } from "./context/AuthContext";
@@ -18,6 +20,16 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
+        <Route
+          path="/verify-email"
+          element={<VerifyEmail />}
+        />
+
+        <Route
+          path="/check-email"
+          element={<CheckEmail />}
+        />
+
         <Route
           path="/login"
           element={

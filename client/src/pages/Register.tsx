@@ -1,17 +1,25 @@
-import { FormEvent, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { type FormEvent, useState } from "react";
+import {
+  Link,
+  useNavigate,
+} from "react-router-dom";
+
 import { register } from "../services/auth.service";
-import { useAuth } from "../context/AuthContext";
+import { startVerificationCooldown } from "../utils/verificationCooldown";
 
 function Register() {
-  const { setAuthToken } = useAuth();
-  const navigate = useNavigate();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [message, setMessage] = useState("");
+  const [password, setPassword] =
+    useState("");
+  const [message, setMessage] =
+    useState("");
 
-  const handleSubmit = async (event: FormEvent) => {
+  const navigate = useNavigate();
+
+  const handleSubmit = async (
+    event: FormEvent
+  ) => {
     event.preventDefault();
     setMessage("");
 
@@ -26,20 +34,29 @@ function Register() {
     }
 
     if (password.length < 8) {
-      setMessage("Password must be at least 8 characters long.");
+      setMessage(
+        "Password must be at least 8 characters long."
+      );
       return;
     }
 
     try {
-      const data = await register({
+      await register({
         name,
         email,
         password,
       });
 
-      setAuthToken(data.token);
+      const normalizedEmail = email.trim().toLowerCase();
 
-      navigate("/dashboard");
+      startVerificationCooldown(normalizedEmail);
+
+      navigate("/check-email", {
+        state: {
+          email: normalizedEmail,
+        },
+      });
+
     } catch (error) {
       setMessage(
         error instanceof Error
@@ -55,59 +72,86 @@ function Register() {
         <h1>TaskFlow-AI</h1>
         <h2>Create an Account</h2>
 
-        <form className="auth-form" onSubmit={handleSubmit}>
+        <form
+          className="auth-form"
+          onSubmit={handleSubmit}
+        >
           <div className="form-group">
-            <label htmlFor="name">Name</label>
+            <label htmlFor="name">
+              Name
+            </label>
 
             <input
               id="name"
               type="text"
               value={name}
-              onChange={(event) => setName(event.target.value)}
+              onChange={(event) =>
+                setName(event.target.value)
+              }
               required
             />
           </div>
 
           <div className="form-group">
-            <label htmlFor="email">Email</label>
+            <label htmlFor="email">
+              Email
+            </label>
 
             <input
               id="email"
               type="email"
               value={email}
-              onChange={(event) => setEmail(event.target.value)}
+              onChange={(event) =>
+                setEmail(event.target.value)
+              }
               required
             />
           </div>
 
           <div className="form-group">
-            <label htmlFor="password">Password</label>
+            <label htmlFor="password">
+              Password
+            </label>
 
             <div className="password-input-area">
               <input
                 id="password"
                 type="password"
                 value={password}
-                onChange={(event) => setPassword(event.target.value)}
+                onChange={(event) =>
+                  setPassword(
+                    event.target.value
+                  )
+                }
                 required
               />
 
               <small>
-                Password must be at least 8 characters long.
+                Password must be at least 8
+                characters long.
               </small>
             </div>
           </div>
 
-          <button className="auth-button" type="submit">
+          <button
+            className="auth-button"
+            type="submit"
+          >
             Register
           </button>
         </form>
 
-        {message && <p className="auth-message">{message}</p>}
+        {message && (
+          <p className="auth-message">
+            {message}
+          </p>
+        )}
 
         <p className="auth-switch">
           Already have an account?{" "}
-          <Link to="/login">Login</Link>
+          <Link to="/login">
+            Login
+          </Link>
         </p>
       </div>
     </div>
