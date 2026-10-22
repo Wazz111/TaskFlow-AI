@@ -8,6 +8,7 @@ import {
 import { api } from "../services/api";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import AITaskBreakdown from "../components/AITaskBreakdown";
 
 
 type TaskStatus =
@@ -530,6 +531,8 @@ function Dashboard() {
       </header>
 
       <main className="dashboard-content">
+        {/* AI TASK BREAKDOWN */}
+        <AITaskBreakdown onTasksSaved={loadTasks} />
         {/* CREATE TASK */}
         <section className="dashboard-section">
           <div className="section-heading">
