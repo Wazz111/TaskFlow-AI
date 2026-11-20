@@ -5,6 +5,7 @@ import morgan from "morgan";
 
 import authRoutes from "./routes/auth.routes";
 import taskRoutes from "./routes/task.routes";
+import aiRoutes from "./routes/ai.routes";
 
 import { errorMiddleware } from "./middleware/error.middleware";
 
@@ -32,6 +33,7 @@ app.get("/api/health", (_req, res) => {
 
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/tasks", taskRoutes);
+app.use("/api/v1/ai", aiRoutes);
 
 app.use(errorMiddleware);
 
